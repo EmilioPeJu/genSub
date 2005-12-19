@@ -1,0 +1,2 @@
+$EPICS/base/bin/solaris/makeBaseApp.pl -t example genSub
+$EPICS/base/bin/solaris/makeBaseApp.pl -i -a  ppc604_long -t example genSub

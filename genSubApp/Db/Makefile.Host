@@ -1,0 +1,8 @@
+# Makefile.Host
+TOP = ../../..
+include $(TOP)/config/CONFIG_APP
+
+DB += dbReceive.db
+DB += dbTransmit.db
+
+include $(TOP)/config/RULES.Db

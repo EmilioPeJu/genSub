@@ -1,0 +1,9 @@
+# Makefile.Vx
+TOP = ../../../../..
+include $(TOP)/config/CONFIG_APP
+
+SRCS.c  += ../receive.c
+LIBOBJS += receive.o
+LIBNAME  = receiveLib
+
+include $(TOP)/config/RULES.Vx

@@ -1,0 +1,10 @@
+# Makefile.Vx
+TOP = ../../../../..
+include $(TOP)/config/CONFIG_APP
+
+INC     += pinfo.h
+SRCS.c  += ../transmit.c
+LIBOBJS += transmit.o
+LIBNAME  = transmitLib
+
+include $(TOP)/config/RULES.Vx
