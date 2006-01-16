@@ -44,6 +44,7 @@ recordtype(genSub) {
 	field(EFLG,DBF_MENU) {
 		prompt("Event Flag")
 		promptgroup(GUI_OUTPUT)
+		initial("1")
 		interest(1)
 		menu(genSubEFLG)
 	}
