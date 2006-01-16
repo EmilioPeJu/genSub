@@ -1,0 +1,56 @@
+[schematic2]
+uniq 30
+[tools]
+[detail]
+w 728 1810 100 0 n#28 hwin.hwin#27.in 704 1808 800 1808 egenSub.egenSub#20.INPE
+w 1288 1906 100 0 n#26 egenSub.egenSub#20.VALD 1088 1904 1536 1904 egenSub.egenSub#21.INPD
+w 1248 1362 100 0 n#25 egenSub.egenSub#20.FLNK 1088 1360 1456 1360 1456 1424 1536 1424 egenSub.egenSub#21.SLNK
+w 1288 1970 100 0 n#24 egenSub.egenSub#20.VALC 1088 1968 1536 1968 egenSub.egenSub#21.INPC
+w 1288 2034 100 0 n#23 egenSub.egenSub#20.VALB 1088 2032 1536 2032 egenSub.egenSub#21.INPB
+w 1288 2098 100 0 n#22 egenSub.egenSub#20.VALA 1088 2096 1536 2096 egenSub.egenSub#21.INPA
+w 674 2088 100 0 n#19 hwin.hwin#14.in 672 2256 672 1872 800 1872 egenSub.egenSub#20.INPD
+[cell use]
+use hwin 504 2216 100 0 hwin#14
+xform 0 576 2256
+p 483 2248 100 0 -1 val(in):23.5
+use hwin 536 1768 100 0 hwin#27
+xform 0 608 1808
+p 515 1800 100 0 -1 val(in):5
+use egenSub 824 1304 100 0 egenSub#20
+xform 0 944 1728
+p 512 1678 100 0 0 SNAM:send
+p 577 1077 100 0 0 UFVB:setup
+p 577 1077 100 0 0 FTVB:CHAR
+p 577 1045 100 0 0 FTVC:STRING
+p 577 725 100 0 0 NOVA:5
+p 577 661 100 0 0 NOVC:4
+p 1168 2062 100 0 1 def(OUTA):listen.A
+p 1088 2074 75 0 -1 pproc(OUTA):NPP
+p 1168 1998 100 0 1 def(OUTB):listen.B
+p 1088 2010 75 0 -1 pproc(OUTB):NPP
+p 1168 1934 100 0 1 def(OUTC):listen.C
+p 1088 1946 75 0 -1 pproc(OUTC):NPP
+p 928 2158 100 0 -1 name:send
+p 512 1998 100 0 0 SCAN:Passive
+p 1088 1882 75 0 -1 pproc(OUTD):NPP
+p 1168 1870 100 0 1 def(OUTD):0.0
+p 1056 1326 100 0 0 def(FLNK):0.0
+p 577 1013 100 0 0 FTVD:LONG
+p 512 1742 100 0 0 EFLG:ON CHANGE
+p 577 981 100 0 0 FTE:DOUBLE
+p 1168 1486 100 0 1 def(OUTJ):listen.J
+use egenSub 1560 1336 100 0 egenSub#21
+xform 0 1680 1760
+p 1248 1710 100 0 0 SNAM:dblisten
+p 1313 1109 100 0 0 UFB:setup
+p 1313 1109 100 0 0 FTB:CHAR
+p 1313 1077 100 0 0 FTC:STRING
+p 1313 757 100 0 0 NOA:5
+p 1313 693 100 0 0 NOC:4
+p 1632 2190 100 0 -1 name:dblisten
+p 1313 1045 100 0 0 FTD:LONG
+p 1248 1774 100 0 0 LFLG:IGNORE
+p 1248 1774 100 0 0 EFLG:NEVER
+use bc200tr -368 280 -100 0 frame
+xform 0 1312 1584
+[comments]

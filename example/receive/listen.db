@@ -1,4 +1,4 @@
-	record(genSub,"remoteReceive") {
+	record(genSub,"listen") {
 		field(DESC,"General Subroutine Record")
 		field(SCAN,"Passive")
 		field(PINI,"NO")
@@ -14,9 +14,9 @@
 		field(SUBL,"0.0000000000000000e+00")
 		field(BRSV,"NO_ALARM")
 		field(INAM,"")
-		field(SNAM,"remoteReceive")
+		field(SNAM,"listen")
 		field(UFA,"")
-		field(UFB,"setupRemoteReceive")
+		field(UFB,"setup")
 		field(UFC,"")
 		field(UFD,"")
 		field(UFE,"")
@@ -78,7 +78,7 @@
 		field(INPA,"0.0")
 		field(INPB,"0.0")
 		field(INPC,"0.0")
-		field(INPD,"transmit.VALD NPP NMS")
+		field(INPD,"send.VALD NPP NMS")
 		field(INPE,"0.000000000000000e+00")
 		field(INPF,"0.0000000000000000e+00")
 		field(INPG,"0.0000000000000000e+00")
@@ -96,3 +96,4 @@
 		field(OUTI,"0.000000000000000e+00")
 		field(OUTJ,"0.000000000000000e+00")
 	}
+

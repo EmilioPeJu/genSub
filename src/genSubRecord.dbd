@@ -2,6 +2,7 @@ menu(genSubLFLG) {
 	choice(genSubLFLG_IGNORE,"IGNORE")
 	choice(genSubLFLG_READ,"READ")
 }
+
 menu(genSubEFLG) {
 	choice(genSubEFLG_NEVER,"NEVER")
 	choice(genSubEFLG_ON_CHANGE,"ON CHANGE")
@@ -72,11 +73,6 @@ recordtype(genSub) {
 		special(SPC_NOMOD)
 		interest(1)
 		size(40)
-	}
-	field(STYP,DBF_SHORT) {
-		prompt("Subr symbol type")
-		special(SPC_NOMOD)
-		interest(3)
 	}
 	field(BRSV,DBF_MENU) {
 		prompt("Bad Return Severity")

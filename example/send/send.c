@@ -13,24 +13,19 @@
 #include <genSubRecord.h>
 #include <pinfo.h>
 
-long setupTransmit( genSubRecord *pgsub )
+long setup( struct genSubRecord *pgsub )
 {
   return( sizeof(struct pinfo) );
 }
 
-long setupLocalReceive( genSubRecord *pgsub )
-{
-  return( sizeof(struct pinfo) );
-}
-
-long transmit( genSubRecord *pgsub )
+long send( struct genSubRecord *pgsub )
 {
   char         sites[4][40];
   double       a[5];
   long         val;
   struct pinfo *ex;
 
-/* Transmit 5 doubles through output link A */
+/* Send 5 doubles through output link A */
 
   a[0] = 12345.678;
   a[1] = 12345.897;
@@ -39,7 +34,7 @@ long transmit( genSubRecord *pgsub )
   a[4] = 78.5;
   memcpy( pgsub->vala, a, 5*sizeof(double) );
 
-/* Transmit a structure through output link B */
+/* Send a structure through output link B */
 
   ex      = (struct pinfo *)calloc(1, sizeof(struct pinfo));
   ex->age = 40;
@@ -50,7 +45,7 @@ long transmit( genSubRecord *pgsub )
   free(ex);
   
 
-/* Transmit 4 strings through output link C */
+/* Send 4 strings through output link C */
 
   strcpy( sites[0], "Royal Greenwich Observatory");
   strcpy( sites[1], "Royal Observatory Edinburgh");
@@ -58,7 +53,7 @@ long transmit( genSubRecord *pgsub )
   strcpy( sites[3], "University College London");
   memcpy(pgsub->valc, sites, 4*40);
 
-/* Transmit a single LONG value through output Link D */
+/* Send a single LONG value through output Link D */
 
   val = 17;
   memcpy(pgsub->vald, &val, sizeof(long) );
@@ -66,7 +61,7 @@ long transmit( genSubRecord *pgsub )
   return(0);
 }
 
-long localReceive( genSubRecord *pgsub )
+long dblisten( struct genSubRecord *pgsub )
 {
   double       *ptr;
   long         *lptr;
@@ -93,7 +88,7 @@ long localReceive( genSubRecord *pgsub )
 
   lptr = (long *)pgsub->d;
   printf("Receiving...through Link D\n");
-  printf("%ld\n", *lptr);
+  printf("%d\n", *lptr);
 
   return(0);
 }

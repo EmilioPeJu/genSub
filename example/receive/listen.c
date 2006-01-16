@@ -14,12 +14,12 @@
 
 static int messcounter = 0;
 
-long setupRemoteReceive( genSubRecord *pgsub )
+long setup( struct genSubRecord *pgsub )
 {
   return( sizeof(struct pinfo) );
 }
 
-long remoteReceive( genSubRecord *pgsub )
+long listen( struct genSubRecord *pgsub )
 {
   double       *ptr;
   struct pinfo *pex;
@@ -44,7 +44,7 @@ long remoteReceive( genSubRecord *pgsub )
   printf("\n");
 
   printf("\nReceiving...through Link D\n");
-  printf("%ld\n", *((long *)pgsub->d));
+  printf("%d\n", *((long *)pgsub->d));
 
   /* This shows that events are posted on VAL */
 

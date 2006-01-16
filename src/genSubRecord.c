@@ -19,20 +19,16 @@
  *                                  "_" (i.e. PPC).
  *      Version 1.5  11/12/03  ajf  Changes to comply with the new macro for 
  *                                  "dbGetLink" in EPICS 3.13.9.
+ *      Version 1.6  16/03/04  wen  Convert to R3.14.
  *
  */
 
 #define DEBUG   0
-#define VERSION 1.5
+#define VERSION 1.6
 
-#include	<vxWorks.h>
 #include	<stdlib.h>
 #include	<stdio.h>
-#include	<lstLib.h>
 #include	<string.h>
-#include	<symLib.h>
-#include        <sysSymTbl.h>   /* for sysSymTbl*/
-#include        <a_out.h>       /* for N_TEXT */
 
 #include	<alarm.h>
 #include	<dbDefs.h>
@@ -43,12 +39,15 @@
 #include	<recSup.h>
 #include	<devSup.h>
 #include 	<special.h>
-#include        <epicsDynLink.h>
+#include 	<registryFunction.h>
+#include 	<epicsExport.h>
+#include 	<recGbl.h>
 
 #define GEN_SIZE_OFFSET
 #include	<genSubRecord.h>
 #undef  GEN_SIZE_OFFSET
 
+typedef long (*SUBFUNCPTR)(genSubRecord *);
 
 /* Create RSET - Record Support Entry Table*/
 
@@ -70,7 +69,7 @@ static long special();
 #define get_enum_strs      NULL
 #define put_enum_str       NULL
 
-struct rset genSubRSET={
+rset genSubRSET={
 	RSETNUMBER,
 	report,
 	initialize,
@@ -89,13 +88,17 @@ struct rset genSubRSET={
 	get_graphic_double,
 	get_control_double,
 	get_alarm_double };
+epicsExportAddress(rset,genSubRSET);
 
 static void monitor( genSubRecord *, int );
 static long do_sub( genSubRecord * );
 static long findField( int, struct dbAddr *, long *, long );
 
 #define ARG_MAX        21
-#define MAX_ARRAY_SIZE 16383    /* 16kB Channel Access Limit for data communication */
+#define MAX_ARRAY_SIZE 10000000
+#ifndef FLDNAME_SZ
+# define FLDNAME_SZ 4
+#endif
 
 /* These are the names of the Input fields */
 static char Ifldnames[ARG_MAX][FLDNAME_SZ+1] =
@@ -117,10 +120,8 @@ int CHECKgensubLINKS = 0;
 
 static long init_record( genSubRecord *pgsub, int pass )
 {
-  FUNCPTR        psubroutine;
-  char           sub_type;
-  void           *sub_addr;
-  char           temp[40];
+  SUBFUNCPTR     psubroutine;
+  SUBFUNCPTR     sub_addr;
   long	         status;
   long           error;
   int            i;
@@ -134,7 +135,6 @@ static long init_record( genSubRecord *pgsub, int pass )
   unsigned long  num;
   struct link    *plinkin;
   struct link    *plinkout;
-  STATUS         ret;
   char           fldnames[ARG_MAX][FLDNAME_SZ+1];
 
   status = 0;
@@ -170,19 +170,15 @@ static long init_record( genSubRecord *pgsub, int pass )
 
         if( ufunct[0] != '\0' )
         {
-          temp[0] = 0;			/* all global variables start with _ */
-          if( ufunct[0] != '_')
-            strcpy(temp,"_");
-          strcat(temp, ufunct);
-          ret = symFindByNameEPICS( sysSymTbl, temp, (void *)&sub_addr, (void *)&sub_type );
-          if( ret < 0 || ((sub_type & N_TEXT) == 0) )
+          sub_addr = (SUBFUNCPTR)registryFunctionFind(ufunct);
+          if( sub_addr == NULL )
           {
             recGblRecordError(S_db_BadSub,(void *)pgsub,"genSubRecord(init_record)");
             status = S_db_BadSub;
           }
           else
           {
-            psubroutine = (FUNCPTR)(sub_addr);
+            psubroutine = sub_addr;
             *totptr     = psubroutine(pgsub);
 
             if( *typptr != DBF_CHAR )
@@ -390,19 +386,15 @@ static long init_record( genSubRecord *pgsub, int pass )
  
         if( pgsub->inam[0] != '\0' )
         {
-          temp[0] = 0;			/* all global variables start with _ */
-          if( pgsub->inam[0] != '_')
-            strcpy(temp,"_");
-          strcat(temp,pgsub->inam);
-          ret = symFindByNameEPICS( sysSymTbl, temp, (void *)&sub_addr, (void *)&sub_type );
-          if( ret < 0 || ((sub_type & N_TEXT) == 0) )
+          sub_addr = (SUBFUNCPTR)registryFunctionFind(pgsub->inam);
+          if( sub_addr == NULL )
           {
 	    recGblRecordError(S_db_BadSub,(void *)pgsub,"genSubRecord(init_record)");
 	    status = S_db_BadSub;
           }
           else
           {
-            psubroutine = (FUNCPTR)(sub_addr);
+            psubroutine = sub_addr;
             error       = psubroutine(pgsub);
           }
         }
@@ -414,15 +406,11 @@ static long init_record( genSubRecord *pgsub, int pass )
         {
           if( pgsub->snam[0] != '\0' )
           {
-            temp[0] = 0;                    /* all global variables start with _ */
-            if( pgsub->snam[0] != '_' )
-              strcpy(temp,"_");
-            strcat(temp,pgsub->snam);
-            ret = symFindByNameEPICS( sysSymTbl, temp, (void *)&sub_addr, (void *)&sub_type );
+            sub_addr = (SUBFUNCPTR)registryFunctionFind(pgsub->snam);
 #if DEBUG
-            printf("Calling symFindByNameEPICS from init_record\n");
+            printf("Calling registryFunctionFind from init_record\n");
 #endif
-            if( (ret < 0) || ((sub_type & N_TEXT) == 0) )
+            if( sub_addr == NULL )
             {
               recGblRecordError(S_db_BadSub,(void *)pgsub,"genSubRecord(init_record)");
               status = S_db_BadSub;
@@ -443,9 +431,7 @@ static long process( genSubRecord *pgsub )
   int            i;
   int            j;
   int            len;
-  char           sub_type;
-  void           *sub_addr;
-  char           temp[40];
+  SUBFUNCPTR     sub_addr;
   long           status;
   struct link    *plinkin;
   struct link    *plinkout;
@@ -454,7 +440,6 @@ static long process( genSubRecord *pgsub )
   long           nRequest;
   long           options;
   void           **valptr;
-  STATUS         ret;
 
   pgsub->pact = TRUE;
   status      = 0;
@@ -475,17 +460,13 @@ static long process( genSubRecord *pgsub )
           /* To save time, only look up the routine if it has a different name */
 
           strcpy(pgsub->onam, pgsub->snam);
-          temp[0] = 0;                    /* all global variables start with _ */
-          if( pgsub->snam[0] != '_' )
-            strcpy(temp,"_");
-          strcat(temp,pgsub->snam);
-          ret = symFindByNameEPICS( sysSymTbl, temp, (void *)&sub_addr, (void *)&sub_type );
+          sub_addr = (SUBFUNCPTR)registryFunctionFind(pgsub->snam);
 #if DEBUG
-          printf("Calling symFindByNameEPICS from process\n");
+          printf("Calling registryFunctionFind from process\n");
 #endif
-          if( (ret < 0) || ((sub_type & N_TEXT) == 0) )
+          if( sub_addr == NULL)
           {
-            recGblRecordError(S_db_BadSub,(void *)pgsub,"genSubRecord(process) symFindByNameEPICS failed");
+            recGblRecordError(S_db_BadSub,(void *)pgsub,"genSubRecord(process) registryFunctionFind failed");
             status = S_db_BadSub;
           }
           else
@@ -681,14 +662,14 @@ static void monitor( genSubRecord *pgsub, int reset )
 
 static long do_sub( genSubRecord *pgsub )
 {
-  long    status;
-  FUNCPTR psubroutine;
+  long       status;
+  SUBFUNCPTR psubroutine;
 
   /* If there is a routine, call it */
 
   if( pgsub->snam[0] != '\0' )
   {
-    psubroutine = (FUNCPTR)((void *)pgsub->sadr);
+    psubroutine = (SUBFUNCPTR)((void *)pgsub->sadr);
     if( psubroutine == NULL)
     {
       recGblRecordError(S_db_BadSub,(void *)pgsub,"genSubRecord(process) NO SUBROUTINE");
@@ -769,10 +750,7 @@ static long put_array_info( struct dbAddr *paddr, long nNew )
 static long special( struct dbAddr *paddr, int after )
 {
   genSubRecord *pgsub;
-  char          sub_type;
-  void         *sub_addr;
-  char          temp[40];
-  STATUS        ret;
+  SUBFUNCPTR    sub_addr;
 
   pgsub = (genSubRecord *)paddr->precord;
   if( after )
@@ -781,17 +759,13 @@ static long special( struct dbAddr *paddr, int after )
     {
       if( pgsub->snam[0] != '\0' )
       {
-        temp[0] = 0;                    /* all global variables start with _ */
-        if( pgsub->snam[0] != '_' )
-          strcpy(temp,"_");
-        strcat(temp,pgsub->snam);
-        ret = symFindByNameEPICS( sysSymTbl, temp, (void *)&sub_addr, (void *)&sub_type );
+        sub_addr = (SUBFUNCPTR)registryFunctionFind(pgsub->snam);
 #if DEBUG
-        printf("Calling symFindByNameEPICS from special\n");
+        printf("Calling registryFunctionFind from special\n");
 #endif
-        if( (ret < 0) || ((sub_type & N_TEXT) == 0) )
+        if( sub_addr == NULL)
         {
-          recGblRecordError(S_db_BadSub,(void *)pgsub,"genSubRecord(special) symFindByNameEPICS failed");
+          recGblRecordError(S_db_BadSub,(void *)pgsub,"genSubRecord(special) registryFunctionFind failed");
           return(S_db_BadSub);
         }
         else

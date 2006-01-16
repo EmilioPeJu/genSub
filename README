@@ -1,0 +1,58 @@
+The "genSub" record for EPICS 3.14
+----------------------------------
+
+There are 4 directories in this tar file.
+
+capfast - Contains: The 6 "genSub" capfast symbols.
+                    The "edb.def" entries.
+
+          If using Capfast:
+          (1) Copy the symbols: capfast/*.sym to the relevant location.
+          (Probably $EPICS/extensions/src/edif/lib/sym)
+          (2) Add the lines in: capfast/edb.def to your edb.def file.
+          (Probably this resides in $EPICS/extensions/src/edif/lib)
+
+docs    - Contains the EPICS Record Reference Manual for the record.
+          genSubManual.pdf
+
+src     - Contains the 3.14 source file and database definition file for 
+          version 1.6 of the genSub record.
+
+example - Contains two further directories:
+          (Note: this example code has NOT been ported to 3.14).
+
+           send
+           ----
+           pinfo.h    - Example structure to transfer between two records.
+           send.c     - Process routine which runs in the sending genSub record.
+           send.db    - Database which contains two genSub's. This is an example of
+                        passing data within an IOC.
+           send.sch   - Capfast schematic of the above database. 
+
+           receive
+           -------
+           pinfo.h    - As above.
+           listen.c   - Process routine which runs in the 'genSub' record in the
+                        receiving IOC.
+           listen.db  - Database which contains a single genSub. Load this is a 
+                        different IOC to send.db.
+           listen.sch - Capfast schematic of the above.
+
+These files are meant to provide an example of how to use the 'genSub' record.
+In the "sending" database, a genSub record puts out values on 4 links. On the first
+link is an array of 5 doubles. On the second link is a user defined structure (defined
+in pinfo.h). On the third link is an array of 4 strings. On the fourth link is a 
+single LONG value.
+Also, in the "sending" database is a second 'genSub' record which receives the data
+across database links.
+
+In the "receiving" database, a single 'genSub' record gets the values via Channel Access
+links as they are pushed/pulled from the "sending" database. Links A, B and C are 
+pushed into the receiving database. Link D is pulled across from the sending database.
+
+===================================================================================
+Andy Foster
+Observatory Sciences Limited    Email: ajf@observatorysciences.co.uk
+William James House             Tel: 44 - (0)1223 - 508259
+Cowley Road                     Fax: 44 - (0)1223 - 508258
+Cambridge, CB4 0WX, UK          http://www.observatorysciences.co.uk
