@@ -20,11 +20,13 @@
  *      Version 1.5  11/12/03  ajf  Changes to comply with the new macro for 
  *                                  "dbGetLink" in EPICS 3.13.9.
  *      Version 1.6  16/03/04  wen  Convert to R3.14.
+ *      Version 1.7  27/06/12  ajf  Fixed bug for 64-bit implementation.
+ *                                  Size of unsigned long verses unsigned int pointer issue.
  *
  */
 
 #define DEBUG   0
-#define VERSION 1.6
+#define VERSION 1.7
 
 #include	<stdlib.h>
 #include	<stdio.h>
@@ -130,7 +132,7 @@ static long init_record( genSubRecord *pgsub, int pass )
   unsigned short *typptr;
   void           **valptr;
   void           **ovlptr;
-  unsigned long  *nelptr;
+  unsigned int   *nelptr;
   unsigned long  *totptr;
   unsigned long  num;
   struct link    *plinkin;
@@ -141,6 +143,12 @@ static long init_record( genSubRecord *pgsub, int pass )
   if( pass == 0 )
   {
     pgsub->vers = VERSION;
+
+#if DEBUG
+    printf("Number of elements in A = %d\n", pgsub->noa);
+    printf("sizeof unsigned long = %ld,  sizeof unsigned int = %d\n", sizeof(*totptr), sizeof(*nelptr));
+#endif
+
     for( j=0; j<2; j++ )
     {
       if( j == 0 )    /* Input fields */
@@ -228,7 +236,15 @@ static long init_record( genSubRecord *pgsub, int pass )
           {
             if( *typptr > DBF_ENUM )
               *typptr = 2;
+
+#if DEBUG
+            printf("Number of elements = %ld, Index into sizeofTypes = %d, sizeofTypes = %d\n", *nelptr, *typptr, sizeofTypes[*typptr]);
+#endif
             num = (*nelptr)*sizeofTypes[*typptr];
+#if DEBUG
+            printf("num = %ld\n", num);
+#endif
+
             if( num > MAX_ARRAY_SIZE )
             {
               printf("Link %s - Array too large! %ld Bytes\n", fldnames[i], num);
