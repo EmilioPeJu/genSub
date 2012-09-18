@@ -22,11 +22,26 @@
  *      Version 1.6  16/03/04  wen  Convert to R3.14.
  *      Version 1.7  27/06/12  ajf  Fixed bug for 64-bit implementation.
  *                                  Size of unsigned long verses unsigned int pointer issue.
+ *      Version 1.8  18/09/12  ajf  Fixed bugs for 64-bit implementation. Version 1.7 contains bugs.
+ *                                  Replace:
+ *                                    unsigned long  *totptr;
+ *                                    unsigned long  num;
+ *                                  with
+ *                                    epicsUInt32    *totptr;
+ *                                    epicsUInt32    num;
+ *                                  in "init_record".
+ *                                  Replace: 
+ *                                    unsigned long  *nelptr;
+ *                                  with
+ *                                    epicsUInt32    *nelptr;
+ *                                  in "process" and "monitor".
+ *                                  Modify declarations of "SADR" and "OSAD" in the "dbd" file.
+ *                                  Fix all compilation warnings for 32-bit and 64-bit.
  *
  */
 
 #define DEBUG   0
-#define VERSION 1.7
+#define VERSION 1.8
 
 #include	<stdlib.h>
 #include	<stdio.h>
@@ -133,8 +148,8 @@ static long init_record( genSubRecord *pgsub, int pass )
   void           **valptr;
   void           **ovlptr;
   unsigned int   *nelptr;
-  unsigned long  *totptr;
-  unsigned long  num;
+  epicsUInt32    *totptr;
+  epicsUInt32    num;
   struct link    *plinkin;
   struct link    *plinkout;
   char           fldnames[ARG_MAX][FLDNAME_SZ+1];
@@ -195,7 +210,7 @@ static long init_record( genSubRecord *pgsub, int pass )
             num = (*nelptr)*(*totptr);
             if( num > MAX_ARRAY_SIZE )
             {
-              printf("Link %s - Array too large! %ld Bytes\n", fldnames[i], num);
+              printf("Link %s - Array too large! %d Bytes\n", fldnames[i], num);
               status = S_db_errArg;
             }
             else
@@ -218,7 +233,7 @@ static long init_record( genSubRecord *pgsub, int pass )
             num = (*nelptr)*MAX_STRING_SIZE;
             if( num > MAX_ARRAY_SIZE )
             {
-              printf("Link %s - Array too large! %ld Bytes\n", fldnames[i], num);
+              printf("Link %s - Array too large! %d Bytes\n", fldnames[i], num);
               status = S_db_errArg;
             }
             else
@@ -247,7 +262,7 @@ static long init_record( genSubRecord *pgsub, int pass )
 
             if( num > MAX_ARRAY_SIZE )
             {
-              printf("Link %s - Array too large! %ld Bytes\n", fldnames[i], num);
+              printf("Link %s - Array too large! %d Bytes\n", fldnames[i], num);
               status = S_db_errArg;
             }
             else
@@ -432,7 +447,7 @@ static long init_record( genSubRecord *pgsub, int pass )
               status = S_db_BadSub;
             }
             else
-              pgsub->sadr = (long)sub_addr;
+              pgsub->sadr = sub_addr;
           }
         }
       }
@@ -452,7 +467,7 @@ static long process( genSubRecord *pgsub )
   struct link    *plinkin;
   struct link    *plinkout;
   unsigned short *typptr;
-  unsigned long  *nelptr;
+  epicsUInt32    *nelptr;
   long           nRequest;
   long           options;
   void           **valptr;
@@ -486,7 +501,7 @@ static long process( genSubRecord *pgsub )
             status = S_db_BadSub;
           }
           else
-            pgsub->sadr = (long)sub_addr;
+            pgsub->sadr = sub_addr;
         }
       }
     }
@@ -605,7 +620,7 @@ static void monitor( genSubRecord *pgsub, int reset )
 {
   int            i;
   unsigned short monitor_mask;
-  unsigned long  *totptr;
+  epicsUInt32    *totptr;
   void           **valptr;
   void           **ovlptr;
 
@@ -786,7 +801,7 @@ static long special( struct dbAddr *paddr, int after )
         }
         else
         {
-          pgsub->sadr = (long)sub_addr;
+          pgsub->sadr = sub_addr;
           monitor(pgsub, 0);
         }
       }

@@ -25,15 +25,17 @@ recordtype(genSub) {
 		special(SPC_NOMOD)
 		interest(1)
 	}
-	field(SADR,DBF_LONG) {
+	field(SADR,DBF_NOACCESS) {
 		prompt("Subroutine Address")
 		special(SPC_NOMOD)
 		interest(1)
+                extra("long (*sadr)(struct genSubRecord *)")
 	}
-	field(OSAD,DBF_LONG) {
+	field(OSAD,DBF_NOACCESS) {
 		prompt("Old Subr. Address")
 		special(SPC_NOMOD)
 		interest(1)
+                extra("long (*osad)(struct genSubRecord *)")
 	}
 	field(LFLG,DBF_MENU) {
 		prompt("Link Flag")
