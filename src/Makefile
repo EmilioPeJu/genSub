@@ -1,6 +1,8 @@
 TOP=..
 include $(TOP)/configure/CONFIG
 
+USR_CFLAGS_Linux += -Wno-address
+
 LIBRARY_IOC        += genSub
 geminiRecords_LIBS += $(EPICS_BASE_IOC_LIBS)
 
